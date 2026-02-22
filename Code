@@ -1,0 +1,22 @@
+import cv2
+import numpy as np
+from google.colab.patches import cv2_imshow 
+filename = 'Nolanix_Activity1.png'
+image = cv2.imread(filename)
+hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+color_rules = {
+    "Blue":   {"lower": [100, 150, 50], "upper": [140, 255, 255], "draw_color": (5, 5, 5)},
+    "Orange": {"lower": [5, 150, 50],   "upper": [25, 255, 255],  "draw_color": (5, 5, 5)},
+    "Green":  {"lower": [40, 100, 50],  "upper": [80, 255, 255],  "draw_color": (5, 5, 5)}
+}
+for name, info in color_rules.items():
+    lower = np.array(info["lower"])
+    upper = np.array(info["upper"])
+    mask = cv2.inRange(hsv_image, lower, upper)
+    dots, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    print(f"Found {len(dots)} {name} dots")
+    for d in dots:
+        (x, y), radius = cv2.minEnclosingCircle(d)
+        center = (int(x), int(y))
+        cv2.circle(image, center, 10, info["draw_color"], 2)
+cv2_imshow(image)
